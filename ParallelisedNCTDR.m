@@ -1,5 +1,5 @@
 clear; clc; clf;
-N = 100;
+N = 500;
 alpha = 1;
 Re = 5000;
 Wi_values = 2:2:8;  
@@ -146,12 +146,14 @@ function [ee,dwdalpha, dwdRe] = OB(Re, Wi, alpha, N)
     Bbalanced = T1*BN*T2;
     [EV,evs]= eig(Abalanced, Bbalanced);
     eeOB = diag(evs);
-    evals = eeOB;
+    ix = real(eeOB)>=-2 & real(eeOB)<=2;
+    evals = eeOB(ix);
+    EV_filtered = EV(:, ix);
     [~, w] = clencurt(N);
 
-    [~, idx] = max(imag(eeOB));
-    ee = eeOB(idx);
-    AA = EV(:, idx);
+    [~, idx] = max(imag(evals));
+    ee = evals(idx);
+    AA = EV_filtered(:, idx);
     eeT = conj(ee);
     OB = Abalanced - ee*Bbalanced;
     %Projection of weights onto the null space
