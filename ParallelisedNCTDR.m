@@ -17,8 +17,7 @@ parfor ii = 1:numel(Wi_values)
     alpha_local = alpha; 
     Re_local = Re; 
 
-    while abs(imag(eemax)) > 1e-9
-        figure(1), hold on;
+    while abs(imag(eemax)) > 1e-9 && Re_local<50000
         fun = @(alpha) max_imag(Re_local, Wi, alpha, N);
         options = optimoptions('fminunc', 'StepTolerance', 1e-2, 'OptimalityTolerance', 1e-2, ...
                                'SpecifyObjectiveGradient', true, 'Display', 'off');
@@ -26,9 +25,8 @@ parfor ii = 1:numel(Wi_values)
         [eemax, dwda, dwdRe] = OB(Re_local, Wi,  alpha_local, N);
         dRe = imag(eemax) / imag(dwdRe);
         relax = 1;
-        Re_local = Re_local + relax * dRe;
+        Re_local = min(Re_local + relax * dRe, 50000);
 
-        quiver(Re_local, imag(eemax), 0, 0.001 * sign(imag(dwdRe)), 'MaxHeadSize', 1);
     end
     
     Re_critical(ii) = Re_local;  
@@ -42,6 +40,9 @@ xlabel('Critical Reynolds Number (Re_{cr})');
 ylabel('Weissenberg Number (Wi)');
 title('Neutral Stability Curve (TDR Model)');
 grid on;
+output_data = [Wi_values(:), Re_critical(:)];
+writematrix(output_data, 'neutral_curve.csv');  % CSV export
+save('neutral_curve.mat', 'Wi_values', 'Re_critical');  % Optional MAT file
 
 function [max_im, dwdalpha_imag, dwdRe] = max_imag(Re, Wi,alpha, N)
     [eigg, dwdalphacalc, dwdRecalc] = OB(Re, Wi, alpha, N);
@@ -146,7 +147,7 @@ function [ee,dwdalpha, dwdRe] = OB(Re, Wi, alpha, N)
     Bbalanced = T1*BN*T2;
     [EV,evs]= eig(Abalanced, Bbalanced);
     eeOB = diag(evs);
-    ix = real(eeOB)>=-2 & real(eeOB)<=2;
+    ix = real(eeOB)>=-1 & real(eeOB)<=1;
     evals = eeOB(ix);
     EV_filtered = EV(:, ix);
     [~, w] = clencurt(N);
@@ -178,10 +179,10 @@ function [ee,dwdalpha, dwdRe] = OB(Re, Wi, alpha, N)
         dOBdRe = dAdRe;
         dOBdRe = BCM'*dOBdRe*BCM;
         dOBdRe = T1*dOBdRe*T2;
-        dwdRe = -dot(W2*OBT(:, ii), dOBdRe*EV(:, idx))/dot(W2*OBT(:, ii), Bbalanced*EV(:,idx)); %sensitivity calculation dwdRe
-        dA1dalpha = [diag(u_n)*1i*(D2-I*alpha^2)-2*I*alpha*1i*diag(u_n)-1i*I*diag(udoubleprime), -(1/(Wi*Re))*1i*D, -(1/(Wi*Re))*(2*alpha*I), (1/(Wi*Re))*1i*D,0*I];
-        dA2dalpha = [-2*diag(Bxy)*D2-1i*Bxxprime-2i*diag(Bxx)*D,1i*diag(u_n),0*I,0*I, 0*I];
-        dA3dalpha = [-1i*Bxyprime-2*alpha*diag(Bxx), 0*I,0*I,0*I,0*I];
+        dwdRe = -dot(W2*OBT(:, ii), dOBdRe*EV_filtered(:, idx))/dot(W2*OBT(:, ii), Bbalanced*EV_filtered(:,idx)); %sensitivity calculation dwdRe
+        dA1dalpha = [diag(u_n)*1i*(D2-I*alpha^2)-2*I*alpha^2*1i*diag(u_n)-1i*diag(udoubleprime), -(1/(Wi*Re))*1i*D, -(1/(Wi*Re))*(2*alpha*I), (1/(Wi*Re))*1i*D,0*I];
+        dA2dalpha = [-1i*Bxxprime-2i*diag(Bxx)*D,1i*diag(u_n),0*I,0*I, 0*I];
+        dA3dalpha = [-1i*Bxyprime-2*alpha*diag(Bxx), 0*I,1i*diag(u_n),0*I,0*I];
         dA4dalpha = [-1i*Byyprime + 2i*diag(Byy)*D-4*alpha*diag(Bxy), 0*I, 0*I, 1i*diag(u_n),0*I];
         dA5dalpha = [-1i*Bzzprime, 0*I, 0*I, 0*I,1i*diag(u_n)];
         dB1dalpha  = [-2i*alpha*I,0*I 0*I, 0*I, 0*I];
@@ -194,7 +195,6 @@ function [ee,dwdalpha, dwdRe] = OB(Re, Wi, alpha, N)
         dOBdalpha = dAdalpha - ee*dBdalpha;
         dOBdalphaBC = BCM'*dOBdalpha*BCM;
         dOBdalphafinal = T1*dOBdalphaBC*T2;
-        dwdalpha = -dot(W2*OBT(:, ii), dOBdalphafinal*EV(:, idx))/dot(W2*OBT(:, ii), Bbalanced*EV(:,idx));
+        dwdalpha = -dot(W2*OBT(:, ii), dOBdalphafinal*EV_filtered(:, idx))/dot(W2*OBT(:, ii), Bbalanced*EV_filtered(:,idx));
         end
-
 end

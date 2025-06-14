@@ -1,7 +1,7 @@
 clc; clear; close all;
 n = 1;
 iter = 1:1:n;
-N =700;
+N =1500;
 eigenvalues_all = {};
 figure(1)
 %mp.Digits(30)
@@ -13,8 +13,8 @@ for i=1:numel(iter)
     D2 = D^2;
     D3 = D^3;
     D4 = D^4;
-    Re = 4000;
-    Wi=10;
+    Re = 6000;
+    Wi=2;
     I = eye(N+1);
     alpha = 1.5;
     B = zeros(1, N+1);
