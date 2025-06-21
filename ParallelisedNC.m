@@ -1,9 +1,9 @@
 clear; clc; clf;
 N = 100;
 alpha = 1;
-Re = 500;
-beta = 0.5;
-Wi_values = 30:2:36;  
+Re = 5000;
+beta = 0.9;
+Wi_values = 1:1:15;  
 Re_critical = zeros(size(Wi_values));
 sensits = zeros(size(Wi_values));
 
@@ -38,11 +38,10 @@ end
 toc
 
 figure;
-plot(Re_critical,Wi_values ,'d-','LineWidth', 2);
-xlabel('Critical Reynolds Number (Re_{cr})');
-ylabel('Weissenberg Number (Wi)');
-title('Neutral Stability Curve (Oldroyd-B fluid,\beta = 0.8)');
-grid on;
+plot(Re_critical,Wi_values ,'d-', 'MarkerSize',14, 'LineWidth', 4);
+xlabel('Critical Reynolds Number ($Re_{cr}$)','FontSize',22,'Interpreter', 'latex');
+ylabel('Weissenberg Number (Wi)','FontSize',22);
+grid off;
 
 function [max_im, dwdalpha_imag, dwdRe] = max_imag(Re, Wi, beta, alpha, N)
     [eigg, dwdalphacalc, dwdRecalc] = OB(Re, Wi, beta, alpha, N);
@@ -78,7 +77,7 @@ function [ee,dwdalpha, dwdRe] = OB(Re, Wi, beta, alpha, N)
     fourthRowmatrix = [-2*(alpha^2)*Wi*diag(Txy)+2*((1-beta)/Re)*1i*alpha*D1, 0*I, 0*I,I+1i*Wi*alpha*diag(u)];
     
     % RHS Matrix(Mass Mattrix)
-     RHSfirstrow = [1i*(D2-alpha^2*I), 0*I, 0*I, 0*I];
+    RHSfirstrow = [1i*(D2-alpha^2*I), 0*I, 0*I, 0*I];
     RHSsecondrow = [0*I, 1i*Wi*I, 0*I, 0*I];
     RHSthirdrow = [ 0*I, 0*I, 1i*Wi*I, 0*I];
     RHSfourthrow = [ 0*I, 0*I, 0*I, 1i*Wi*I];

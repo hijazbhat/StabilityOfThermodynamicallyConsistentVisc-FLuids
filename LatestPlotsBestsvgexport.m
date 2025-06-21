@@ -1,8 +1,7 @@
 clear; clc;
 N = 500;
 Re = 800;
-E = 1e-10;
-Wi = E * Re;
+Wi = 80;
 beta = 0.8;
 alpha = 1.5;
 
@@ -60,24 +59,43 @@ ee = evals(idx);
 
 figure(1)
 set(gcf, 'Color', 'w', 'Position', [100, 100, 800, 600]);
-plot(evals, '.', 'MarkerSize', 45, 'DisplayName', 'All eigenvalues');
+plot(evals, '.', 'MarkerSize', 40, 'HandleVisibility','off');
 hold on;
-plot(ee, '*r', 'MarkerSize', 18, 'DisplayName', 'Most unstable');
-xlim([0 1.5]);
-ylim([-0.8 0.2]);
-xlabel('$\mathbf{Re(\omega)}$', 'Interpreter', 'latex', 'FontSize', 18);
-ylabel('$\mathbf{Im(\omega)}$', 'Interpreter', 'latex', 'FontSize', 18);
-title(sprintf('Eigenvalue Spectrum\n$Re = %g$, $Wi = %.1e$, $\\beta = %.2f$', Re, Wi, beta), 'Interpreter', 'latex', 'FontSize', 20);
-grid on;
+plot(ee, '*r', 'MarkerSize', 40,  'HandleVisibility','off');
+hold on;
+yline(0,'k', LineWidth=1.5,HandleVisibility = 'off');
+xlim([0.5 1.5]);
+ylim([-1.2 0.2]);
+xlabel('$\mathbf{Re(\omega)}$', 'Interpreter', 'latex', 'FontSize', 30, FontWeight='bold');
+ylabel('$\mathbf{Im(\omega)}$', 'Interpreter', 'latex', 'FontSize', 30, FontWeight='bold');
+
+grid off;
 box on;
 ax = gca;
-ax.FontSize = 14;
+ax.FontSize = 26;
 ax.TickLabelInterpreter = 'latex';
 ax.LineWidth = 1.2;
 max_imag = imag(ee);
 msg = sprintf('$\\omega_{cr} = %.4f$', max_imag);
-text(1.1, -0.75, msg, 'Interpreter', 'latex', 'FontSize', 16, 'BackgroundColor', 'w');
-legend('Location', 'northeast', 'Interpreter', 'latex');
+
+h_legend = plot(nan, nan, '*r', MarkerSize=40);  % red asterisk as placeholder
+legend(h_legend, {sprintf('$Im(\\omega_{cr}) = %.4f$', imag(ee))}, ...
+       'Interpreter', 'latex', 'FontSize', 30, 'Location', 'northeast');
+ax_inset = axes('Position', [0.6, 0.25, 0.25, 0.25]);
+distances = abs(evals - ee);
+[~, sorted_indices] = sort(distances);
+nearest_indices = sorted_indices(1:30);  % 30 closest eigenvalues
+evals_zoom = evals(nearest_indices);
+
+plot(evals_zoom, '.', 'MarkerSize', 25, 'HandleVisibility','off');
+hold on;
+plot(ee, '*r', 'MarkerSize', 20, 'HandleVisibility','off');
+x_center = real(ee);
+y_center = imag(ee);
+xlim([x_center - 0.05, x_center + 0.05]);
+ylim([y_center - 0.05, y_center + 0.05]);
+set(gca, 'FontSize', 12, 'TickLabelInterpreter', 'latex', 'LineWidth', 1.0);
+
 
 ev_unstable_bal = EV(:, idx);
 ev_unstable = NB * T2 * ev_unstable_bal;

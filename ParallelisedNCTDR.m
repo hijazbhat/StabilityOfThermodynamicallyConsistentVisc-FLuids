@@ -1,8 +1,8 @@
 clear; clc; clf;
 N = 500;
 alpha = 1;
-Re = 5000;
-Wi_values = 2:2:8;  
+Re = 1000;
+Wi_values = 16:20;  
 Re_critical = zeros(size(Wi_values));
 sensits = zeros(size(Wi_values));
 
@@ -10,19 +10,30 @@ sensits = zeros(size(Wi_values));
 tic
 parpool(4);  % parallel pool with 4 workers
 
-
+N_local = N;
 parfor ii = 1:numel(Wi_values)
     eemax = 1i;
+    N_local = N;
     Wi = Wi_values(ii);
     alpha_local = alpha; 
     Re_local = Re; 
-
-    while abs(imag(eemax)) > 1e-9 && Re_local<50000
-        fun = @(alpha) max_imag(Re_local, Wi, alpha, N);
+    if Wi<5
+        N_local=N_local;
+    elseif Wi>5 && Wi<10
+        N_local = N_local +200;
+    elseif Wi>10 && Wi<15
+        N_local = N_local+400;
+    else
+        N_local = N_local+300
+    end
+        
+      
+    while abs(imag(eemax)) > 1e-5 && Re_local<50000
+        fun = @(alpha) max_imag(Re_local, Wi, alpha, N_local);
         options = optimoptions('fminunc', 'StepTolerance', 1e-2, 'OptimalityTolerance', 1e-2, ...
                                'SpecifyObjectiveGradient', true, 'Display', 'off');
         alpha_local = fminunc(fun, alpha_local, options);
-        [eemax, dwda, dwdRe] = OB(Re_local, Wi,  alpha_local, N);
+        [eemax, dwda, dwdRe] = OB(Re_local, Wi,  alpha_local, N_local);
         dRe = imag(eemax) / imag(dwdRe);
         relax = 1;
         Re_local = min(Re_local + relax * dRe, 50000);

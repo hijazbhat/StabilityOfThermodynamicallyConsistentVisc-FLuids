@@ -1,10 +1,10 @@
 clear;clc;
 N= 500;
 Re =800;
-E=1e-10;
-Wi = E*Re;
-Wi = Wi;
-beta =0.8;
+%E=0.05;
+%Wi = E*Re;
+Wi = 10;
+beta =0;
 
 alpha =1.5;
 [D, y] = cheb(N);
@@ -83,29 +83,63 @@ Abalanced = T1*AN*T2;
 Bbalanced = T1*BN*T2;
 [EV,evs]= eig(Abalanced, Bbalanced);
 eeOB = diag(evs);
-%ix = real(eeOB)>=-0.5 & real(eeOB)<=2.5;
-evals = eeOB;
+ix = real(eeOB)>=-2 & real(eeOB)<=2;
+evals = eeOB(ix);
+%evals = eeOB;
 [~, idx] = max(imag(evals));
 
 ee = evals(idx);
 figure(1)
-plot(evals,'.', MarkerSize=45);
-axis([0 1.5 -0.8 0.2]);
-
+set(gcf, 'Color', 'w', 'Position', [100, 100, 800, 600]);
+plot(evals, '.', 'MarkerSize', 25, 'HandleVisibility','off');
 hold on;
-plot(ee, '*r', MarkerSize=45);
-max_imag = imag(ee);
-msg = sprintf('Max Im(\\omega): %.4f', max_imag);
-title(['Eigenvalue Spectrum for Re=', num2str(Re), ' ,Wi =',num2str(Wi), ' and beta=',num2str(beta)],FontSize=22, FontWeight='bold');
-xlabel('Real(\omega)',FontSize=22,FontWeight='bold');
-ylabel('Imag(\omega)',FontSize=22,FontWeight='bold');
+plot(ee, '*r', 'MarkerSize', 25,  'HandleVisibility','off');
+hold on;
+yline(0,'k', LineWidth=1.5,HandleVisibility = 'off');
+xlim([0.5 1.5]);
+ylim([-1.2 0.2]);
+xlabel('$\mathbf{Re(\omega)}$', 'Interpreter', 'latex', 'FontSize', 24, FontWeight='bold');
+ylabel('$\mathbf{Im(\omega)}$', 'Interpreter', 'latex', 'FontSize', 24, FontWeight='bold');
+
+grid off;
+box on;
 ax = gca;
-ax.XAxis.FontSize = 16;
-ax.YAxis.FontSize = 16;
-xLimits = xlim;
-yLimits = ylim;
-text(xLimits(2) - 0.2*range(xLimits),yLimits(1) + 0.05*range(yLimits),msg,'FontSize', 24, 'FontWeight', 'bold', 'BackgroundColor', 'w');
-hold off;
+ax.FontSize = 22;
+ax.TickLabelInterpreter = 'latex';
+ax.LineWidth = 1.2;
+max_imag = imag(ee);
+msg = sprintf('$\\omega_{cr} = %.4f$', max_imag);
+
+h_legend = plot(nan, nan, '*r', MarkerSize=25);  % red asterisk as placeholder
+legend(h_legend, {sprintf('$Im(\\omega_{cr}) = %.4f$', imag(ee))}, ...
+       'Interpreter', 'latex', 'FontSize', 26, 'Location', 'southeast');
+% ax_inset = axes('Position', [0.20, 0.15, 0.15, 0.15]);
+% distances = abs(evals - ee);
+% [~, sorted_indices] = sort(distances);
+% nearest_indices = sorted_indices(1:100);  % 30 closest eigenvalues
+% x_min = real(ee)-0.7;
+% x_max = real(ee)+0.10;
+% y_min = imag(ee)-0.15;
+% y_max =imag(ee)+0.15;
+% 
+% real_part = real(evals);
+% imag_part = imag(evals);
+% 
+% in_region = (real_part >= x_min) & (real_part <= x_max) & (imag_part >= y_min) & (imag_part <= y_max);
+% 
+% evals_region = evals(in_region);
+% %evals_zoom = evals(evals_region);
+% 
+% plot(evals_region, '.', 'MarkerSize', 15, 'HandleVisibility','off');
+% hold on;
+% plot(ee, '*r', 'MarkerSize', 10, 'HandleVisibility','off');
+% yline(0, 'k', 'LineWidth', 1.2);
+% x_center = real(ee);
+% y_center = imag(ee);
+% xlim([x_center - 0.05, x_center + 0.05]);
+% ylim([y_center - 0.05, y_center + 0.05]);
+% set(gca, 'FontSize', 12, 'TickLabelInterpreter', 'latex', 'LineWidth', 1.0);
+
 ev_unstable_bal = EV(:, idx);
 ev_unstable = NB * T2 * ev_unstable_bal;
 psi = ev_unstable(1:N+1);
