@@ -1,7 +1,7 @@
 clc; clear; close all;
 n = 1;
 iter = 1:1:n;
-N =500;
+N =2000;
 eigenvalues_all = {};
 figure(1)
 %mp.Digits(30)
@@ -14,8 +14,8 @@ for i=1:numel(iter)
     D2 = D^2;
     D3 = D^3;
     D4 = D^4;
-    Re = 50000;
-    Wi=3;
+    Re = 800;
+    Wi=100;
     I = eye(N+1);
     alpha = 1.2138;
     B = zeros(1, N+1);
@@ -100,18 +100,18 @@ for i=1:numel(iter)
     Abalanced = T1*AN*T2;
     Bbalanced = T1*BN*T2;
 
-    figure(1);
+
     [EV, eigss] = eig(Abalanced, Bbalanced);
     eigss = diag(eigss);
-    ix = real(eigss)>=-3 & real(eigss)<=3;
-    %eigss = eigss(ix);
-    [~, idx] = max(imag(eigss));
-    ee = eigss(idx);
+    ix = real(eigss)>=-0.5 & real(eigss)<=2;
+    evals = eigss(ix);
+    [~, idx] = max(imag(evals));
+    ee = evals(idx);
     figure(1)
     set(gcf, 'Color', 'w', 'Position', [100, 100, 800, 600]);
-    plot(eigss, '.', 'MarkerSize', 40, 'HandleVisibility','off');
+    plot(evals, '.', 'MarkerSize', 25, 'HandleVisibility','off');
     hold on;
-    plot(eigss(idx), '*r', 'MarkerSize', 40, 'HandleVisibility','off');
+    plot(ee, '*r', 'MarkerSize', 25,  'HandleVisibility','off');
     hold on;
     yline(0,'k', LineWidth=1.5,HandleVisibility = 'off');
     xlim([0.5 1.5]);
@@ -128,26 +128,53 @@ for i=1:numel(iter)
     max_imag = imag(ee);
     msg = sprintf('$\\omega_{cr} = %.4f$', max_imag);
 
-    h_legend = plot(nan, nan, '*r', MarkerSize=40);  % red asterisk as placeholder
+    h_legend = plot(nan, nan, '*r', MarkerSize=25);  % red asterisk as placeholder
     legend(h_legend, {sprintf('$Im(\\omega_{cr}) = %.4f$', imag(ee))}, ...
-        'Interpreter', 'latex', 'FontSize', 26, 'Location', 'northeast');
-    ax_inset = axes('Position', [0.6, 0.25, 0.25, 0.25]);
-    distances = abs(evals - ee);
-    [~, sorted_indices] = sort(distances);
-    nearest_indices = sorted_indices(1:30);  % 30 closest eigenvalues
-    evals_zoom = evals(nearest_indices);
+        'Interpreter', 'latex', 'FontSize', 26, 'Location', 'southeast');
+    % ax_inset = axes('Position', [0.20, 0.15, 0.15, 0.15]);
+    % distances = abs(evals - ee);
+    % [~, sorted_indices] = sort(distances);
+    % nearest_indices = sorted_indices(1:100);  % 30 closest eigenvalues
+    % x_min = real(ee)-0.7;
+    % x_max = real(ee)+0.10;
+    % y_min = imag(ee)-0.15;
+    % y_max =imag(ee)+0.15;
+    %
+    % real_part = real(evals);
+    % imag_part = imag(evals);
+    %
+    % in_region = (real_part >= x_min) & (real_part <= x_max) & (imag_part >= y_min) & (imag_part <= y_max);
+    %
+    % evals_region = evals(in_region);
+    % %evals_zoom = evals(evals_region);
+    %
+    % plot(evals_region, '.', 'MarkerSize', 15, 'HandleVisibility','off');
+    % hold on;
+    % plot(ee, '*r', 'MarkerSize', 10, 'HandleVisibility','off');
+    % yline(0, 'k', 'LineWidth', 1.2);
+    % x_center = real(ee);
+    % y_center = imag(ee);
+    % xlim([x_center - 0.05, x_center + 0.05]);
+    % ylim([y_center - 0.05, y_center + 0.05]);
+    % set(gca, 'FontSize', 12, 'TickLabelInterpreter', 'latex', 'LineWidth', 1.0);
 
-    plot(evals_zoom, '.', 'MarkerSize', 25, 'HandleVisibility','off');
-    hold on;
-    plot(ee, '*r', 'MarkerSize', 20, 'HandleVisibility','off');
-    x_center = real(ee);
-    y_center = imag(ee);
-    xlim([x_center - 0.05, x_center + 0.05]);
-    ylim([y_center - 0.05, y_center + 0.05]);
-    set(gca, 'FontSize', 12, 'TickLabelInterpreter', 'latex', 'LineWidth', 1.0);
-
-
-
-    disp(max(imag(eigss)));
+    ev_unstable_bal = EV(:, idx);
+    ev_unstable = BCM * T2 * ev_unstable_bal;
+    psi = ev_unstable(1:N+1);
+    %psi = psi / max(abs(psi));
+    psi =real(1i*alpha*psi);
+    psi = psi/max(abs(psi));
+    y_tot = y/(Wi*Re);
+    y_tot = [1;y_tot];
+    figure(2)
+    plot(y_tot,psi, 'LineWidth', 1.5);
+    axis([-1 1 -1 1])
+    ylabel('Im($\psi$)','Interpreter','latex', 'FontSize',24,'FontWeight','bold');
+    xlabel('y', 'FontSize',24,'FontWeight','bold');
+    ax = gca;
+    % ax.XAxis.FontWeight = 'bold';
+    ax.XAxis.FontSize = 22;
+    %ax.YAxis.FontWeight = 'bold';
+    ax.YAxis.FontSize = 22;
 end
 toc

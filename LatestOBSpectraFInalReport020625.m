@@ -3,8 +3,8 @@ N= 500;
 Re =800;
 %E=0.05;
 %Wi = E*Re;
-Wi = 10;
-beta =0;
+Wi = 0.8;
+beta =0.8;
 
 alpha =1.5;
 [D, y] = cheb(N);
@@ -144,16 +144,16 @@ ev_unstable_bal = EV(:, idx);
 ev_unstable = NB * T2 * ev_unstable_bal;
 psi = ev_unstable(1:N+1);
 %psi = psi / max(abs(psi));
-psi =imag(psi);
-psi = psi/max(psi);
+psi =real(1i*alpha*psi);
+psi = psi/max(abs(psi));
 figure(2)
 plot(y,psi, 'LineWidth', 1.5);
-axis([0 1 -1 1])
-xlabel('Imag(\psi)');
-ylabel('y');
+axis([-1 1 -1 1])
+ylabel('Im($\psi$)','Interpreter','latex', 'FontSize',24,'FontWeight','bold');
+xlabel('y', 'FontSize',24,'FontWeight','bold');
 ax = gca;
-ax.XAxis.FontWeight = 'bold';
-ax.XAxis.FontSize = 12;
-ax.YAxis.FontWeight = 'bold';
-ax.YAxis.FontSize = 12;
-title(['Imaginary Part of Streamfunction, for \omega_{max} = ', num2str(ee)]);
+% ax.XAxis.FontWeight = 'bold';
+ax.XAxis.FontSize = 22;
+%ax.YAxis.FontWeight = 'bold';
+ax.YAxis.FontSize = 22;
+%title(['Imaginary Part of Streamfunction, for $\omega_{max}$ = ', num2str(ee)],'Interpreter','latex', 'FontSize', 22);

@@ -2,7 +2,7 @@ clear; clc; clf;
 N = 500;
 alpha = 1;
 Re = 1000;
-Wi_values = 16:20;  
+Wi_values = 12:1:20;  
 Re_critical = zeros(size(Wi_values));
 sensits = zeros(size(Wi_values));
 
