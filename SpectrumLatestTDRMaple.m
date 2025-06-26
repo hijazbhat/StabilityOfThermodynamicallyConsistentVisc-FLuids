@@ -1,7 +1,7 @@
 clc; clear; close all;
 n = 1;
 iter = 1:1:n;
-N =2000;
+N =500;
 eigenvalues_all = {};
 figure(1)
 %mp.Digits(30)
@@ -14,8 +14,8 @@ for i=1:numel(iter)
     D2 = D^2;
     D3 = D^3;
     D4 = D^4;
-    Re = 800;
-    Wi=100;
+    Re = 1500;
+    Wi=12;
     I = eye(N+1);
     alpha = 1.2138;
     B = zeros(1, N+1);
@@ -28,19 +28,25 @@ for i=1:numel(iter)
 
     Z = null(B);
     A = (108+8*y.^6+12*(12*y.^6+81).^(1/2)).^(1/3);
-    integ = -y.*(4*y.^4+2*A.*y.^2+A.^2)./(6*A);
+    integ = -Re*y.*(4*y.^4+2*A.*y.^2+A.^2)./(6*A);
 
     C_proj=Z'*D*Z;
 
     u=linsolve(C_proj,integ);
-    u = [0;u];
-    u_n = u/(Wi^2*Re);
+    u_n = [0;u];
+    %u_n = u/(Wi^2*Re);
     u_n = u_n/max(abs(u_n));
-
     %u_n = 1-y.^2;
     uprime = D*u_n;
+    % y_plot = [1;y/(Wi*Re)];
     udoubleprime = D2*u_n;
     lambda = (1./(1+(Wi*uprime).^2)).^(1/3); %base state lagrange mult
+
+    %plot(u_n, [-1;y]);
+
+    %residual = uprime./(1+(Wi*uprime).^2).^(1/3) + Re*y_plot;
+    %residual = udoubleprime./(1+(Wi*uprime).^2).^(1/3) - 2*Wi^2*uprime.^2.*udoubleprime./(1+(Wi*uprime).^2).^(4/3);
+    %plot(y_plot,residual);
     %lambda = ones(1,3);
     %lambda = diag(lambdavec); %lambda matrix
     Bxx = lambda.*(1 + 2*(uprime*Wi).^2);
@@ -95,6 +101,7 @@ for i=1:numel(iter)
     BCM = null([d1; d2; d3; d4; d5; d6; d7; d8; d9; d10; d11; d12]);
     AN = BCM'*A*BCM;
     BN = BCM'*B*BCM;
+    [EVS, ~] = eig(AN,BN);
 
     [T1, T2] = balance2(AN, BN);
     Abalanced = T1*AN*T2;
@@ -103,8 +110,11 @@ for i=1:numel(iter)
 
     [EV, eigss] = eig(Abalanced, Bbalanced);
     eigss = diag(eigss);
-    ix = real(eigss)>=-0.5 & real(eigss)<=2;
+    ix = real(eigss)>=-0.5 & real(eigss)<=1.5;
     evals = eigss(ix);
+    EV = EV(:,ix);
+    EVS = EVS(:, ix);
+    %evals = eigss;
     [~, idx] = max(imag(evals));
     ee = evals(idx);
     figure(1)
@@ -158,11 +168,11 @@ for i=1:numel(iter)
     % ylim([y_center - 0.05, y_center + 0.05]);
     % set(gca, 'FontSize', 12, 'TickLabelInterpreter', 'latex', 'LineWidth', 1.0);
 
-    ev_unstable_bal = EV(:, idx);
-    ev_unstable = BCM * T2 * ev_unstable_bal;
+    ev_unstable_bal = EVS(:, idx);
+    ev_unstable = BCM * ev_unstable_bal;
     psi = ev_unstable(1:N+1);
     %psi = psi / max(abs(psi));
-    psi =real(1i*alpha*psi);
+    psi =real(psi);
     psi = psi/max(abs(psi));
     y_tot = y/(Wi*Re);
     y_tot = [1;y_tot];
@@ -178,3 +188,4 @@ for i=1:numel(iter)
     ax.YAxis.FontSize = 22;
 end
 toc
+residue_vec = AN*psi-ee*BN*psi;

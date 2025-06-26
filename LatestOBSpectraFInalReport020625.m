@@ -3,8 +3,8 @@ N= 500;
 Re =800;
 %E=0.05;
 %Wi = E*Re;
-Wi = 0.8;
-beta =0.8;
+Wi = 10;
+beta =0;
 
 alpha =1.5;
 [D, y] = cheb(N);
@@ -77,7 +77,7 @@ B = [RHSfirstrow;
 
 AN=NB'*A*NB; %Null Space Projection
 BN=NB'*B*NB; %Null Space Projection
-
+[EVS,~] = eig(AN, BN);
 [T1, T2] = balance2(AN,BN);
 Abalanced = T1*AN*T2;
 Bbalanced = T1*BN*T2;
@@ -85,6 +85,7 @@ Bbalanced = T1*BN*T2;
 eeOB = diag(evs);
 ix = real(eeOB)>=-2 & real(eeOB)<=2;
 evals = eeOB(ix);
+EVS = EVS(:, ix);
 %evals = eeOB;
 [~, idx] = max(imag(evals));
 
@@ -140,11 +141,11 @@ legend(h_legend, {sprintf('$Im(\\omega_{cr}) = %.4f$', imag(ee))}, ...
 % ylim([y_center - 0.05, y_center + 0.05]);
 % set(gca, 'FontSize', 12, 'TickLabelInterpreter', 'latex', 'LineWidth', 1.0);
 
-ev_unstable_bal = EV(:, idx);
-ev_unstable = NB * T2 * ev_unstable_bal;
+ev_unstable_bal = EVS(:, idx);
+ev_unstable = NB * ev_unstable_bal;
 psi = ev_unstable(1:N+1);
 %psi = psi / max(abs(psi));
-psi =real(1i*alpha*psi);
+psi =imag(psi);
 psi = psi/max(abs(psi));
 figure(2)
 plot(y,psi, 'LineWidth', 1.5);

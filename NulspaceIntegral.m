@@ -17,12 +17,12 @@ C_proj=Z'*D_up*Z;
 
 u=linsolve(C_proj,integ);
 u = [0;u];
-u = u/(4*Wi^2*R);
+u = u/(4*R*Wi^2);
 uprime = D_up*u;
 udoubleprime = D_up*uprime;
-residual = D_up*(uprime./(1+(Wi*uprime).^2).^1/3)
+residual = D_up*(uprime./(1+(Wi*uprime).^2).^(1/3))+2*Re;
 % residual = udoubleprime./(1+(Wi*uprime).^2).^1/3 - 2*Wi^2*uprime.^2.*udoubleprime./(1+(Wi*uprime).^2).^4/3;
-%plot(y_up, residual);
+plot(y_up, residual);
 hold on;
-plot(u/max(u),y_up)
+%plot(u/max(u),y_up)
 

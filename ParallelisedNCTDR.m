@@ -1,8 +1,8 @@
 clear; clc; clf;
-N = 500;
+N = 300;
 alpha = 1;
 Re = 1000;
-Wi_values = 12:1:20;  
+Wi_values = 12:1:15;  
 Re_critical = zeros(size(Wi_values));
 sensits = zeros(size(Wi_values));
 
@@ -158,7 +158,7 @@ function [ee,dwdalpha, dwdRe] = OB(Re, Wi, alpha, N)
     Bbalanced = T1*BN*T2;
     [EV,evs]= eig(Abalanced, Bbalanced);
     eeOB = diag(evs);
-    ix = real(eeOB)>=-1 & real(eeOB)<=1;
+    ix = real(eeOB)>=-0.5& real(eeOB)<=1;
     evals = eeOB(ix);
     EV_filtered = EV(:, ix);
     [~, w] = clencurt(N);
