@@ -46,13 +46,13 @@ end
     
 % Default values
 if nargin < 3 || isempty(tol),
-    tol = mp(1e-6);
+    tol = 1e-6;
 end
 if nargin < 4 || isempty(maxit),
     maxit = min(n,20);
 end
 if nargin < 5 || isempty(Minv),
-    Minv = mp(eye(n,n));
+    Minv = eye(n,n);
 end
 if nargin < 6 || isempty(x0),
     x0 = zeros(n,1);

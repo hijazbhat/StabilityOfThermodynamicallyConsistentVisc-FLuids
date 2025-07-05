@@ -1,11 +1,11 @@
 clear; clc; clf;
-N = 300;
+N = 100;
 alpha = 1;
 Re = 1000;
 Wi_values = 12:1:15;  
 Re_critical = zeros(size(Wi_values));
 sensits = zeros(size(Wi_values));
-
+alpha_critical = zeros(size(Wi_values));
 
 tic
 parpool(4);  % parallel pool with 4 workers
@@ -28,7 +28,7 @@ parfor ii = 1:numel(Wi_values)
     end
         
       
-    while abs(imag(eemax)) > 1e-5 && Re_local<50000
+    while abs(imag(eemax)) > 1e-2 && Re_local<50000
         fun = @(alpha) max_imag(Re_local, Wi, alpha, N_local);
         options = optimoptions('fminunc', 'StepTolerance', 1e-2, 'OptimalityTolerance', 1e-2, ...
                                'SpecifyObjectiveGradient', true, 'Display', 'off');
@@ -41,6 +41,7 @@ parfor ii = 1:numel(Wi_values)
     end
     
     Re_critical(ii) = Re_local;  
+    alpha_critical(ii) = alpha_local;
 end
 
 toc
@@ -51,9 +52,9 @@ xlabel('Critical Reynolds Number (Re_{cr})');
 ylabel('Weissenberg Number (Wi)');
 title('Neutral Stability Curve (TDR Model)');
 grid on;
-output_data = [Wi_values(:), Re_critical(:)];
-writematrix(output_data, 'neutral_curve.csv');  % CSV export
-save('neutral_curve.mat', 'Wi_values', 'Re_critical');  % Optional MAT file
+output_data = [Wi_values(:), Re_critical(:), alpha_critical(:)];
+writematrix(output_data, 'neutral_curve.csv'); 
+save('neutral_curve.mat', 'Wi_values', 'Re_critical'); 
 
 function [max_im, dwdalpha_imag, dwdRe] = max_imag(Re, Wi,alpha, N)
     [eigg, dwdalphacalc, dwdRecalc] = OB(Re, Wi, alpha, N);

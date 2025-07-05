@@ -14,23 +14,24 @@ for i=1:numel(iter)
     D2 = D^2;
     D3 = D^3;
     D4 = D^4;
-    Re = 1500;
+    Re = 1400;
     Wi=12;
     I = eye(N+1);
-    alpha = 1.2138;
+    alpha = 1;
     B = zeros(1, N+1);
     B(1,1) = 1;
 
     y=y(2:end);
 
     y0=y;
-    y=Re*Wi*y;
+    y=2*Re*Wi*y;
 
     Z = null(B);
     A = (108+8*y.^6+12*(12*y.^6+81).^(1/2)).^(1/3);
     integ = -Re*y.*(4*y.^4+2*A.*y.^2+A.^2)./(6*A);
 
     C_proj=Z'*D*Z;
+    %C_proj = 2*Wi*Re*C_proj;
 
     u=linsolve(C_proj,integ);
     u_n = [0;u];
@@ -110,13 +111,13 @@ for i=1:numel(iter)
 
     [EV, eigss] = eig(Abalanced, Bbalanced);
     eigss = diag(eigss);
-    ix = real(eigss)>=-0.5 & real(eigss)<=1.5;
-    evals = eigss(ix);
+    ix = real(eigss)>=-0.1 & real(eigss)<=1.5;
+    %evals = eigss(ix);
     EV = EV(:,ix);
     EVS = EVS(:, ix);
-    %evals = eigss;
+    evals = eigss;
     [~, idx] = max(imag(evals));
-    ee = evals(idx);
+    ee = evals(idx)
     figure(1)
     set(gcf, 'Color', 'w', 'Position', [100, 100, 800, 600]);
     plot(evals, '.', 'MarkerSize', 25, 'HandleVisibility','off');
@@ -169,17 +170,27 @@ for i=1:numel(iter)
     % set(gca, 'FontSize', 12, 'TickLabelInterpreter', 'latex', 'LineWidth', 1.0);
 
     ev_unstable_bal = EVS(:, idx);
-    ev_unstable = BCM * ev_unstable_bal;
+    ev_unstable = BCM*ev_unstable_bal;
     psi = ev_unstable(1:N+1);
     %psi = psi / max(abs(psi));
-    psi =real(psi);
-    psi = psi/max(abs(psi));
-    y_tot = y/(Wi*Re);
+    psi_imag =imag(psi);
+    psi_imag = psi_imag/max(abs(psi_imag));
+    psi_real =real(psi);
+    psi_real = psi_real/max(abs(psi_real));
+    psi_mag =abs(psi);
+    psi_mag = psi_mag/max(abs(psi_mag));
+    y_tot = y/(2*Wi*Re);
     y_tot = [1;y_tot];
     figure(2)
-    plot(y_tot,psi, 'LineWidth', 1.5);
+    plot(y_tot,psi_imag,'r', 'LineWidth', 1.5);
+    hold on;
+    plot(y_tot,psi_real,'c', 'LineWidth', 1.5);
+    hold on;
+    plot(y_tot,psi_mag,'b', 'LineWidth', 1.5);
     axis([-1 1 -1 1])
-    ylabel('Im($\psi$)','Interpreter','latex', 'FontSize',24,'FontWeight','bold');
+    legend({'Imag($\psi$)', 'Real($\psi$)', 'abs($\psi$)'}, ...
+       'Interpreter', 'latex', 'FontSize', 14, 'Location', 'best');
+    ylabel('$\psi$','Interpreter','latex', 'FontSize',24,'FontWeight','bold');
     xlabel('y', 'FontSize',24,'FontWeight','bold');
     ax = gca;
     % ax.XAxis.FontWeight = 'bold';
@@ -188,4 +199,14 @@ for i=1:numel(iter)
     ax.YAxis.FontSize = 22;
 end
 toc
-residue_vec = AN*psi-ee*BN*psi;
+eigvec = EV(:, idx);
+eigvec =T2*eigvec;
+residue_vec = AN*eigvec - ee*BN*eigvec;
+%residue_vec = BCM*residue_vec;
+%plot(y_tot(2:end-1),abs((residue_vec(2:N))));
+plot(y_tot(2:end-1), residue_vec(1:N-1));
+norm_sf = norm(residue_vec)
+% norm_res = norm(abs(residue_vec))
+normAv = norm(AN*eigvec)
+rel_norm = norm_sf/normAv;
+disp(rel_norm)

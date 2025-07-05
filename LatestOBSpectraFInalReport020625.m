@@ -1,12 +1,12 @@
 clear;clc;
 N= 500;
-Re =800;
-%E=0.05;
+Re =2536;
+%E=0.1;
 %Wi = E*Re;
-Wi = 10;
+Wi = 2;
 beta =0;
 
-alpha =1.5;
+alpha =1.31;
 [D, y] = cheb(N);
 % D = D(2:N, 2:N);
 % y = y(2:N);
@@ -86,6 +86,7 @@ eeOB = diag(evs);
 ix = real(eeOB)>=-2 & real(eeOB)<=2;
 evals = eeOB(ix);
 EVS = EVS(:, ix);
+EV=EV(:,ix)
 %evals = eeOB;
 [~, idx] = max(imag(evals));
 
@@ -142,8 +143,8 @@ legend(h_legend, {sprintf('$Im(\\omega_{cr}) = %.4f$', imag(ee))}, ...
 % set(gca, 'FontSize', 12, 'TickLabelInterpreter', 'latex', 'LineWidth', 1.0);
 
 ev_unstable_bal = EVS(:, idx);
-ev_unstable = NB * ev_unstable_bal;
-psi = ev_unstable(1:N+1);
+ev_unstable = NB *ev_unstable_bal;
+psi =ev_unstable(1:N+1);
 %psi = psi / max(abs(psi));
 psi =imag(psi);
 psi = psi/max(abs(psi));
@@ -158,3 +159,15 @@ ax.XAxis.FontSize = 22;
 %ax.YAxis.FontWeight = 'bold';
 ax.YAxis.FontSize = 22;
 %title(['Imaginary Part of Streamfunction, for $\omega_{max}$ = ', num2str(ee)],'Interpreter','latex', 'FontSize', 22);
+eigvec = EVS(:, idx);
+eigvec = NB*eigvec;
+residue_vec = A*eigvec - ee*B*eigvec;
+%residue_vec = Nb*residue_vec;
+figure(3)
+plot(y,abs((residue_vec(1:N+1))));
+norm_sf = norm(residue_vec(1:N+1))
+norm_res = norm(abs(residue_vec))
+Av = A*eigvec;
+normAv = norm(Av(1:N+1))
+rel_norm = norm_res/normAv;
+disp(rel_norm)

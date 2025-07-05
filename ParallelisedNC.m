@@ -42,6 +42,42 @@ plot(Re_critical,Wi_values ,'d-', 'MarkerSize',14, 'LineWidth', 4);
 xlabel('Critical Reynolds Number ($Re_{cr}$)','FontSize',22,'Interpreter', 'latex');
 ylabel('Weissenberg Number (Wi)','FontSize',22);
 grid off;
+Wi_fine = linspace(1,15,300);
+Re_interp = interp1(Wi_values, Re_critical, Wi_fine,'spline');
+figure(2)
+plot(Re_interp,Wi_fine, 'b-', LineWidth=2);
+hold on;
+plot(Re_critical,Wi_values ,'.', 'MarkerSize',20, 'LineWidth', 4);
+xlabel('Critical Reynolds Number ($Re_{cr}$)','FontSize',22,'Interpreter', 'latex');
+ylabel('Weissenberg Number (Wi)','FontSize',22);
+grid off;
+figure;
+plot(Re_critical, Wi_values, 'd-', 'MarkerSize', 14, 'LineWidth', 4);
+xlabel('Critical Reynolds Number ($Re_{cr}$)', 'FontSize', 22, 'Interpreter', 'latex');
+ylabel('Weissenberg Number (Wi)', 'FontSize', 22);
+grid off;
+
+Wi_fine = linspace(1, 16, 300);
+Re_interp = interp1(Wi_values, Re_critical, Wi_fine, 'spline');
+Re_axis_min = 5300;
+Re_axis_max = 5870;
+Wi_axis_min = 1;
+Wi_axis_max = 18;
+x_fill = [Re_axis_min * ones(size(Wi_fine)), fliplr(Re_interp)];
+y_fill = [ Wi_fine, fliplr(Wi_fine)];
+
+
+figure;
+fill(x_fill, y_fill, [0.6 0.6 0.6], 'FaceAlpha', 0.3, 'EdgeColor', 'none');
+hold on;
+plot(Re_interp, Wi_fine, 'b-', 'LineWidth', 2);
+plot(Re_critical, Wi_values, '.', 'MarkerSize', 20, 'LineWidth', 4);
+xlabel('Critical Reynolds Number ($Re_{cr}$)', 'FontSize', 22, 'Interpreter', 'latex');
+ylabel('Weissenberg Number (Wi)', 'FontSize', 22);
+grid off;
+
+
+
 
 function [max_im, dwdalpha_imag, dwdRe] = max_imag(Re, Wi, beta, alpha, N)
     [eigg, dwdalphacalc, dwdRecalc] = OB(Re, Wi, beta, alpha, N);
